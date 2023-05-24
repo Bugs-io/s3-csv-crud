@@ -8,3 +8,11 @@ class DownloadFileError(Exception):
 
 class FileNotFoundError(Exception):
     pass
+
+
+class DeletingFileError(Exception):
+    pass
+
+
+class UpdatingFileError(Exception):
+    pass

@@ -3,7 +3,8 @@ import os
 import logging
 from dotenv import dotenv_values
 from botocore.exceptions import ClientError
-from app.errors import UploadingFileError, DownloadFileError, FileNotFoundError
+from app.errors import UploadingFileError, DownloadFileError, \
+        FileNotFoundError, DeletingFileError, UpdatingFileError
 
 config = dotenv_values(".env")
 
@@ -18,19 +19,19 @@ class S3Client:
                 region_name=config['REGION_NAME']
                 )
 
-    def _file_exists_in_bucket(self, file_name):
+    def _file_exists_in_bucket(self, filename):
         try:
-            self.client.head_object(Bucket=self.bucket_name, Key=file_name)
+            self.client.head_object(Bucket=self.bucket_name, Key=filename)
             return True
         except ClientError:
             return False
 
-    def upload_file(self, file, file_name):
+    def upload_file(self, file, filename):
         try:
             self.client.upload_fileobj(
                     file,
                     self.bucket_name,
-                    file_name
+                    filename
                     )
         except ClientError as e:
             logging.error(e)
@@ -50,3 +51,20 @@ class S3Client:
         except ClientError as e:
             logging.error(e)
             raise DownloadFileError
+
+    def delete_file(self, filename):
+        if not self._file_exists_in_bucket(filename):
+            raise FileNotFoundError
+        try:
+            self.client.delete_object(Bucket=self.bucket_name, Key=filename)
+        except ClientError as e:
+            logging.error(e)
+            raise DeletingFileError
+
+    def update_file(self, file, filename):
+        if not self._file_exists_in_bucket(filename):
+            raise FileNotFoundError
+        try:
+            self.upload_file(file, filename)
+        except UpdatingFileError:
+            raise UpdatingFileError
