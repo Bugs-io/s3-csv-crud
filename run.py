@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request, send_file
-from app.s3 import S3Client
-from .errors import UploadingFileError, DownloadFileError, \
+from S3Client import S3Client
+from errors import UploadingFileError, DownloadFileError, \
         FileNotFoundError, DeletingFileError, UpdatingFileError
 
 app = Flask(__name__)
@@ -86,5 +86,6 @@ def update_csv(filename):
         return jsonify({'error': f'Error updating {filename} file'}), 500
 
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=3000)
+if __name__ == "__main__":
+    app.directory = './'
+    app.run(host='127.0.0.1', port=5000)

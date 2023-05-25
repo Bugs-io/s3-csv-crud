@@ -1,22 +1,24 @@
 import boto3
 import os
 import logging
-from dotenv import dotenv_values
+from dotenv import load_dotenv
 from botocore.exceptions import ClientError
-from app.errors import UploadingFileError, DownloadFileError, \
+from errors import UploadingFileError, DownloadFileError, \
         FileNotFoundError, DeletingFileError, UpdatingFileError
 
-config = dotenv_values(".env")
+
+project_folder = os.path.expanduser('~/s3-csv-crud')
+load_dotenv(os.path.join(project_folder, '.env'))
 
 
 class S3Client:
     def __init__(self):
-        self.bucket_name = config["BUCKET_NAME"]
+        self.bucket_name = os.getenv("BUCKET_NAME")
         self.client = boto3.client(
                 's3',
-                aws_access_key_id=config['AWS_ACCESS_KEY_ID'],
-                aws_secret_access_key=config['AWS_SECRET_ACCESS_KEY'],
-                region_name=config['REGION_NAME']
+                aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
+                aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
+                region_name=os.getenv('REGION_NAME')
                 )
 
     def _file_exists_in_bucket(self, filename):
